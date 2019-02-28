@@ -1,0 +1,184 @@
+unit JSC_QHD_30;
+
+interface
+
+ uses spcomm, Winapi.Windows, System.SysUtils, Vcl.Dialogs, Vcl.ExtCtrls;
+
+ type THuier_JSC_QHD_30 = class
+   private
+      { Private declarations }
+      Comm1 : TComm;
+      Timer1: TTimer;
+      FScaleMscommRecvBufwt : integer;
+      FScaleMscommRecvBuf   : array[1..1024] of byte;
+      FCommTmr : integer;
+
+      FCommState : integer;
+      FValue : Double;
+      FCommFailureCount : Integer;
+      procedure OnCommReceve(Sender: TObject; Buffer: Pointer; BufferLength: Word);
+    protected
+      { Protected declarations }
+
+    protected
+      { Protected declarations }
+
+    public
+      { Public declarations }
+      constructor Create;
+      destructor Destroy;
+      procedure setcommname(name : string; baudrate : Dword; stopbit : TStopBits;
+        parity :TParity; ReadIntervalTimeout:DWORD; ByteSize:TByteSize );
+      procedure TmrTimer(Sender: TObject);
+    published
+      { Published declarations }
+      property value: double read FValue;
+      property CommFailureCount : integer read FCommFailureCount;
+
+end;
+
+implementation
+
+Constructor THuier_JSC_QHD_30.Create;
+begin
+  Comm1  := TComm.Create(Comm1);
+  Timer1 := TTimer.Create(Timer1);
+end;
+
+destructor THuier_JSC_QHD_30.Destroy;
+begin
+  Comm1.Free;
+  Timer1.Free;
+end;
+
+procedure THuier_JSC_QHD_30.setcommname(name : string; baudrate : Dword;
+  stopbit : TStopBits; parity :TParity; ReadIntervalTimeout:DWORD; ByteSize:TByteSize );
+begin
+//  FCommState := CNTStateIsIdle;
+  FScaleMscommRecvBufwt := 1;
+
+  Comm1.CommName := name;
+  Comm1.BaudRate := baudrate;
+  Comm1.StopBits := stopbit;
+  comm1.parity   := parity;;
+  comm1.ReadIntervalTimeout := ReadIntervalTimeout;
+  comm1.ByteSize := ByteSize;
+
+  Comm1.OnReceiveData := OnCommReceve;
+  try
+    comm1.StartComm ;
+//        WeightMscommPortOpen := True;
+    except on e:Exception do
+    begin
+      ShowMessage(e.Message);
+//        WeightMscommPortOpen := False;
+    end
+  end;
+
+  FCommTmr := 0;
+  Timer1.Interval := 100;
+  timer1.OnTimer  := TmrTimer;
+  Timer1.Enabled  := true;
+end;
+
+procedure THuier_JSC_QHD_30.OnCommReceve(
+  Sender: TObject; Buffer: Pointer; BufferLength: Word);
+var
+  rbuf : array[1..1024] of byte;
+  i, k, h : Integer;
+  viewstring : String;
+  SumCheck,
+  SumCheckH,
+  SuCheckL : Byte;
+  TempWeight : double;
+
+  Head : Boolean;
+begin
+  if bufferlength >= 1024 then
+  begin
+    exit;
+  end;
+
+  move(buffer^,pchar(@rbuf)^,bufferlength);
+
+  for i := 1 to bufferlength do
+  begin
+    if (FScaleMscommRecvBufwt >= 1020) or (FScaleMscommRecvBufwt <1) then
+      FScaleMscommRecvBufwt := 1;
+
+    FScaleMscommRecvBuf[FScaleMscommRecvBufwt] := rbuf[i];
+    FScaleMscommRecvBufwt := FScaleMscommRecvBufwt +1;
+  end;
+
+  if FScaleMscommRecvBufwt > 2 then
+  for i := 1 to FScaleMscommRecvBufwt do
+  begin
+    Head := False;
+    if ( ( (FScaleMscommRecvBuf[i-1]=ord('S')) and (FScaleMscommRecvBuf[i]=ord('T')) )
+      or ( ( FScaleMscommRecvBuf[i-1]=ord('U') ) and ( FScaleMscommRecvBuf[i]=ord('S') ) ))
+      and
+        ( ( ( FScaleMscommRecvBuf[i+2]=ord('N') ) and ( FScaleMscommRecvBuf[i+3]=ord('T') ) )
+      or (( FScaleMscommRecvBuf[i+2]=ord('G') ) and ( FScaleMscommRecvBuf[i+3]=ord('S') )) )
+       then
+    begin
+      h := 1;
+      for k := i-1 to FScaleMscommRecvBufwt do
+      begin
+        FScaleMscommRecvBuf[h] := FScaleMscommRecvBuf[k] ;
+        h := h +1;
+      end;
+      FScaleMscommRecvBufwt := h;
+      Head := True;
+      break;
+    end;
+  end;
+
+  if Head then
+  begin
+    if FScaleMscommRecvBufwt>=18 then
+    begin
+      if ( FScaleMscommRecvBuf[15]=ord('k') ) and (FScaleMscommRecvBuf[16]=ord('g')) and (FScaleMscommRecvBuf[17]=$0D) and (FScaleMscommRecvBuf[18]=$0A) then
+      begin
+        for K := 8 to 14 do
+        begin
+          viewstring :=viewstring + chr(FScaleMscommRecvBuf[k]) ;
+        end;
+        viewstring := Trim(viewstring);
+        if viewstring<> '' then
+        begin
+            try
+              TempWeight := strTofloat( viewstring );
+              FValue := TempWeight;
+              if FScaleMscommRecvBuf[7]=ord('-') then
+              FValue := -FValue;
+//              if FScaleMscommSucess <= 4 then
+//                ScaleMscommSucess1 := ScaleMscommSucess1 +1;
+              if FCommFailureCount >0 then
+                FCommFailureCount := FCommFailureCount -1;
+            except
+              ;
+            end;
+        end;
+
+        FScaleMscommRecvBufwt := 1;
+      end
+      else
+      begin
+        FScaleMscommRecvBufwt := 1;
+      end;
+    end;
+  end;
+end;
+
+procedure THuier_JSC_QHD_30.TmrTimer(Sender: TObject);
+begin
+  FCommTmr := FCommTmr + Timer1.Interval;
+  if FCommTmr>=500 then
+  begin
+    FCommTmr := 0;
+    if FCommFailureCount <10 then
+      FCommFailureCount := FCommFailureCount + 1;
+  end;
+end;
+
+end.

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.295,E:\天赢\外协地磅\软件\Unit1.pas=E:\天赢\外协地磅\软件\HCNetSDK.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.402,=E:\天赢\外协地磅\软件\UnitLogin.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.777,E:\天赢\外协地磅\软件\Unit1.pas=E:\天赢\外协地磅\软件\UnitVar.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.560,=E:\天赢\外协地磅\软件\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.200,=E:\天赢\外协地磅\软件\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.433,C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Unit1.dfm=E:\天赢\外协地磅\UnitMain.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.597,C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Project1.dproj=E:\天赢\外协地磅\Scale.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.505,=C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.433,C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Unit1.pas=E:\天赢\外协地磅\UnitMain.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.600,=C:\Users\Administrator\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>

@@ -1,0 +1,19 @@
+program Scale;
+
+uses
+  Vcl.Forms,
+  UnitMain in 'UnitMain.pas' {FrmMain},
+  UnitVar in 'UnitVar.pas';
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+
+  ScaleMscommRecvBufwt1 := 1;
+  ScaleMscommRecvBufRd1 := 1;
+
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFrmMain, FrmMain);
+  Application.Run;
+end.
